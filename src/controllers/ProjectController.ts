@@ -54,13 +54,7 @@ export class ProjectController {
         const { id } = req.params
         console.log(id)
         try {
-            const project = await Project.findById(id)
-            if(!project){
-                const error = new Error('Proyecto no encontrado')
-                return res.status(404).json({error: error.message})
-            }
-            await project.deleteOne()
-            res.send('Proyecto Eliminado')            
+                     
         } catch (error) {
             console.log(error)
         }
