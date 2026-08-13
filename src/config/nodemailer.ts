@@ -1,17 +1,19 @@
 import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
+dotenv.config()
 
 const config = () => {
     return {
-        host: "sandbox.smtp.mailtrap.io",
-        port: 2525,
+        host: process.env.SMTP_HOST,
+        port: +process.env.SMTP_PORT,
         auth: {
-          user: "3b715365750290",
-          pass: "f4673124f1579c"
-  }
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
     }
 }
 
-export const trasporter = nodemailer.createTransport(config());
+export const transporter = nodemailer.createTransport(config());
 
 //transport.sendMail({
 //  from: "Private Person <from@example.com>",
