@@ -41,6 +41,7 @@ export class AuthController {
             await Promise.allSettled([user.save(), token.save()])
             res.send("Cuenta creada, revisa tu email para confirmarla")
         } catch (error) {
+            console.error(error)
             res.status(500).json({error: 'Hubo un error'})
         }
     }
@@ -76,8 +77,8 @@ export class AuthController {
 
             if(!user.confirmed){
                 const token = new Token()
-                token.token = user.id
                 token.token = generateToken()
+                token.user = new Types.ObjectId(user.id)
                 await token.save()
 
                 //enviar el email
@@ -104,7 +105,7 @@ export class AuthController {
         }
     }
 
-       static requestConfirmationCode = async (req: Request, res: Response) => {
+    static requestConfirmationCode = async (req: Request, res: Response) => {
         try { 
             const { email } = req.body
 
@@ -135,6 +136,36 @@ export class AuthController {
 
             await Promise.allSettled([user.save(), token.save()])
             res.send("Se envio un nuevo token a tu e-mail")
+        } catch (error) {
+            res.status(500).json({error: 'Hubo un error'})
+        }
+    }
+
+    static forgotPassword = async (req: Request, res: Response) => {
+        try { 
+            const { email } = req.body
+
+            //Usuario Existe
+            const user = await User.findOne({email})
+            if(!user){
+                const error = new Error('El Usuario no esta registrado')
+                return res.status(404).json({error: error.message})
+            }
+
+            //Generar el token
+            const token = new Token()
+            token.token = generateToken()
+            token.user = new Types.ObjectId(user.id)
+            await token.save()
+
+            //enviar el email
+            AuthEmail.sendPasswordResetToken({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
+            
+            res.send("Revisa tu e-mail para instrucciones")
         } catch (error) {
             res.status(500).json({error: 'Hubo un error'})
         }
