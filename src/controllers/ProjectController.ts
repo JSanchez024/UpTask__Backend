@@ -1,12 +1,14 @@
-//import { response, type Request, type Response } from "express"
 import type { Request, Response } from "express"
 import Project from "../models/Project"
-
 
 
 export class ProjectController {
     static createProject = async (req: Request, res: Response) => {
         const project = new Project(req.body)
+        
+        //Asigna un manager
+        project.manager = req.user._id
+
         try {
            await project.save()
            res.send('Proyecto Creado Correctamente')

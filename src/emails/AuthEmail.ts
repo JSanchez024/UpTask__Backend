@@ -1,41 +1,46 @@
-import { transporter } from "../config/nodemailer"
-
-interface IEMail{
-    email: string
-    name: string
-    token: string
+import nodemailer from 'nodemailer'
+import { getTransporter } from '../config/nodemailer'
+ 
+interface IEmail {
+  email: string
+  name: string
+  token: string
 }
-
-export class AuthEmail{
-    static sendConfirmationEmail = async ( user : IEMail ) => {
-        const info = await transporter.sendMail({
-                from: 'UpTask <admin@uptask.com>',
-                to: user.email,
-                subject: 'Uptask - Confirmar tu cuenta',
-                text: 'Uptask - Conifima tu cuenta',
-                html: `<p>Hola: ${user.name}, has creado tu cuenta en UpTask, ya casi esta todo listo, solo debes condirmar tu cuenta</p>
-                
-                <p>Visita el siguiente enlace</p>
-                <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirmar cuenta</a>
-                <p>E ingresa el codigo: <b>${user.token}</b></p>
-                <p>Este token expira en 10 minutos</p>                
-                `
-            })
-    }
-
-    static sendPasswordResetToken = async ( user : IEMail ) => {
+ 
+export class AuthEmail {
+  static sendConfirmationEmail = async (user: IEmail) => {
+    const transporter = await getTransporter()
+ 
     const info = await transporter.sendMail({
-            from: 'UpTask <admin@uptask.com>',
-            to: user.email,
-            subject: 'Uptask - Reestablece tu password',
-            text: 'Uptask - Reestablece tu password',
-            html: `<p>Hola: ${user.name}, has solicitado reestablecer tu password.</p>
-            
-            <p>Visita el siguiente enlace</p>
-            <a href="${process.env.FRONTEND_URL}/auth/new-password">Reestablecer Password</a>
-            <p>E ingresa el codigo: <b>${user.token}</b></p>
-            <p>Este token expira en 10 minutos</p>                
-            `
-        })
-    }
+      from: '"UpTask" <no-reply@uptask.com>',
+      to: user.email,
+      subject: 'Uptask - Confirmar tu cuenta',
+      text: `Uptask - Conifima tu cuenta`,
+      html: `<p>Hola: ${user.name}, has creado tu cuenta en UpTask, ya casi esta todo listo, solo debes condirmar tu cuenta</p>
+             <p>Visita el siguiente enlace</p>
+             <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirmar cuenta</a>
+             <p>E ingresa el codigo: <b>${user.token}</b></p>
+              <p>Este token expira en 10 minutos</p> 
+             `,
+    })
+  }
+ 
+  static sendPasswordResetToken = async (user: IEmail) => {
+    const transporter = await getTransporter()
+ 
+    const info = await transporter.sendMail({
+      from: 'UpTask <admin@uptask.com>',
+      to: user.email,
+      subject: 'Uptask - Reestablece tu password',
+      text: 'Uptask - Reestablece tu password',
+      html: `<p>Hola: ${user.name}, has solicitado reestablecer tu password.</p>
+             <p>Visita el siguiente enlace</p>
+             <a href="${process.env.FRONTEND_URL}/auth/new-password">Reestablecer Password</a>
+             <p>E ingresa el codigo: <b>${user.token}</b></p>
+             <p>Este token expira en 10 minutos</p> 
+             `,
+    })
+  }
 }
+
+
