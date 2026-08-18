@@ -3,15 +3,16 @@ import { body, param } from "express-validator";
 import { ProjectController } from "../controllers/ProjectController";
 import { handleInputErrors } from "../middleware/validation";
 import { TaskController } from "../controllers/TaskController";
-//import { validateProjectExists } from "../middleware/project";
 import { projectExists } from "../middleware/project";
 import { taskBelongsToProject, taskExists } from "../middleware/task";
 import { authenticate } from "../middleware/auth";
+import { TeamMemberController } from "../controllers/TeamController";
 
 const router = Router()
 
+router.use(authenticate)
+
 router.post('/',
-    authenticate, 
     body('projectName')
         .notEmpty().withMessage('El Nombre del Proyecto es Obligatrio'),
     body('clientName')
@@ -21,7 +22,6 @@ router.post('/',
     handleInputErrors,
     ProjectController.createProject
 )
-
 
 router.get('/', ProjectController.getAllProjects)
 
@@ -90,7 +90,6 @@ router.delete('/:projectId/tasks/:taskId',
     TaskController.deleteTask
 )
 
-
 router.post('/:projectId/tasks/:taskId/status',
     param('taskId').isMongoId().withMessage('ID no valido'),
     body('status')
@@ -98,4 +97,32 @@ router.post('/:projectId/tasks/:taskId/status',
     handleInputErrors,
     TaskController.updateStatus
 )
+
+//Routes for teams
+router.post('/:projectId/team/find',
+    body('email')
+        .isEmail().toLowerCase().withMessage('E-mail no valido'),
+        handleInputErrors,
+        TeamMemberController.findMemberByEmail
+)
+
+router.get('/:projectId/team',
+    TeamMemberController.getProjectTeam
+)
+
+router.post('/:projectId/team',
+    body('id')
+        .isMongoId().withMessage('ID No Valido'),
+        handleInputErrors,
+        TeamMemberController.addMemberById
+)
+
+router.delete('/:projectId/team',
+    body('id')
+        .isMongoId().withMessage('ID No Valido'),
+        handleInputErrors,
+        TeamMemberController.removeMemberById
+)
+
+
 export default router
