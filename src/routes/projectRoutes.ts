@@ -124,5 +124,12 @@ router.delete('/:projectId/team',
         TeamMemberController.removeMemberById
 )
 
+router.delete('/:projectId/team/:userId',
+    param('userId')
+        .isMongoId().withMessage('ID No Valido'),
+        handleInputErrors,
+        TeamMemberController.removeMemberById
+)
+
 
 export default router
