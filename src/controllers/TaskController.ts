@@ -11,7 +11,6 @@ export class TaskController{
             const error = new Error('Proyecto no encontrado')
             return res.status(404).json({error: error.message})
         }
-
         try {
             const task = new Task(req.body)
             task.project = req.project._id
@@ -24,7 +23,6 @@ export class TaskController{
     }
 
     static getProjectTasks = async (req: Request, res: Response) => {
-
         try {
             const tasks = await Task.find({project: req.project._id}).populate('project')
             res.json(tasks)
@@ -35,11 +33,13 @@ export class TaskController{
 
     static getTaskById = async (req: Request, res: Response) => {
         try {
+            const task = await Task.findById(req.task._id)
+                .populate({path: 'completedBy.user', select: 'id name email'})
             if(req.task.project.toString() !== req.project._id.toString()){
                 const error = new Error('Accion no valida')
                 return res.status(400).json({error: error.message})
             }
-            res.json(req.task)
+            res.json(task)
         } catch (error) {
             res.status(500).json({error: 'Hubo un error'})            
         }
@@ -70,9 +70,13 @@ export class TaskController{
         try {
             const { status } = req.body
             req.task.status = status
+            const data = {
+                user: req.user._id,
+                status
+            }
+            req.task.completedBy.push(data)
             await req.task.save()
             res.send('Tarea Actualizada')
-
         } catch (error) {
             res.status(500).json({error: 'Hubo un error'})  
         }
