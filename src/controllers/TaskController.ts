@@ -35,6 +35,7 @@ export class TaskController{
         try {
             const task = await Task.findById(req.task._id)
                 .populate({path: 'completedBy.user', select: 'id name email'})
+                .populate({path: 'notes', populate: {path: 'createdBy', select:'id name email'}})
             if(req.task.project.toString() !== req.project._id.toString()){
                 const error = new Error('Accion no valida')
                 return res.status(400).json({error: error.message})
