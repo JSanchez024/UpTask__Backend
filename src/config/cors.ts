@@ -1,19 +1,25 @@
 import { CorsOptions } from "cors"
 
+const allowedOrigins = new Set(
+    [process.env.FRONTEND_URL, process.env.FRONTEND_URL?.replace(/\/$/, '')]
+        .filter((value): value is string => Boolean(value))
+)
+
 export const corsConfig: CorsOptions = {
-    origin: function(origin, callback){
-
-        const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : '';
-
-        const whitelist = [process.env.FRONTEND_URL]
-        if(process.argv[2] === '--api'){
-            whitelist.push(undefined)
-        }
-        if(whitelist.includes(origin)){
+    origin: function (origin, callback) {
+        if (!origin) {
             callback(null, true)
-        }else{
-            console.error(`[CORS Error] Origen bloqueado: ${origin}`);
-            callback(new Error('Error de CORS'))
+            return
         }
+
+        const normalizedOrigin = origin.replace(/\/$/, '')
+
+        if (allowedOrigins.has(normalizedOrigin)) {
+            callback(null, true)
+            return
+        }
+
+        console.error(`[CORS Error] Origen bloqueado: ${origin}`)
+        callback(new Error('Error de CORS'))
     }
 }
